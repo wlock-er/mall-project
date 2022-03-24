@@ -7,8 +7,12 @@
     "build": "vue-cli-service build"
   },
   "dependencies": {
+    "axios": "^0.26.1",
     "core-js": "^3.8.3",
+    "element-plus": "^2.1.4",
+    "swiper": "^5.4.5",
     "vue": "^3.2.13",
+    "vue-awesome-swiper": "^2.6.7",
     "vue-router": "^4.0.3",
     "vuex": "^4.0.0"
   },
