@@ -1,0 +1,59 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    min-width: 1000px;
+    overflow-x: hidden;
+    background-color: rgb(248, 248, 248);
+    font-family: "SimHei";
+}
+
+@media screen and (max-width: 1000px) {
+    html {
+        font-size: 35px;
+    }
+    body {
+        overflow-x: auto;
+    }
+}
+
+@media screen and (min-width: 1000px) {
+    html {
+        font-size: 35px;
+    }
+}
+
+@media screen and (min-width: 1110px) {
+    html {
+        font-size: 39px;
+    }
+}
+
+@media screen and (min-width: 1280px) {
+    html {
+        font-size: 40px;
+    }
+}
+
+@media screen and (min-width: 1400px) {
+    html {
+        font-size: 50px;
+    }
+}
+
+input {
+    outline: none;
+    border: 1px solid #000;
+    transition: all .3s;
+    border-radius: 5px;
+}
+
+input:focus {
+    border: 1px solid rgb(40, 187, 255);
+}
+
+body {
+    font-size: .32rem;
+}
