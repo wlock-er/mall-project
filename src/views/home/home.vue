@@ -30,17 +30,6 @@
         <div class="swiper_right"><img src="http://demo.mxyhn.xyz:8020/cssthemes6/2.08ZF06/images/adv02.jpg" alt=""></div>
       </div>
     </div>
-
-    <!-- <div class="categorypb_wrap">
-      <div class="pb_title">新鲜水果</div>
-      <div class="pb_content">
-         <div class="pb_content_list" v-for="item in goods_list" :key="item">
-           <img src="http://demo.mxyhn.xyz:8020/cssthemes6/2.08ZF06/images/goods/goods003.jpg" alt="">
-           <p class="pb_name">{{item.content}}</p>
-           <p class="pb_price">￥{{item.price}}</p>
-         </div>
-      </div>
-    </div> -->
     <div class="categorypb_wrap" v-for="item in category" :key="item">
       <div class="pb_title">{{item.name}}</div>
       <div class="pb_content">

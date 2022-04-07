@@ -19,16 +19,16 @@
            <div class="title_list">小计</div>
        </div>
        <div class="cart_list_wrap">
-           <div class="cart_list" v-for="(item,index) in goods_detail" :key="index" >
+           <div class="cart_list" v-for="(item,index) in cartlist" :key="index" >
                <input type="checkbox" @click="checkthis" :checked="isCheck" :ref="el => { if (el) checks.push(el) }">
-               <img src="http://demo.mxyhn.xyz:8020/cssthemes6/2.08ZF06/images/goods/goods003.jpg" alt="">
+               <img :src="item.imgpath" alt="">
                <p class="goods_content">{{item.title}}</p>
                <div class="goods_price">￥{{item.price}}</div>
                <button @click="operate('-',index)">-</button>
                <div class="goods_amount">{{item.amount}}</div>
                <button @click="operate('+',index)">+</button>
                <div class="amount_price">￥{{item.amountPrice}}</div>
-               <div class="delete" @click="deleteGoods">删除</div>
+               <div class="delete" @click="deleteGoods(index)">删除</div>
            </div>
        </div>
        <div class="cart_bottom" ref="bottom">
@@ -47,13 +47,16 @@
 </template>
 
 <script>
+import { useRouter } from "vue-router"
 import { ref, onMounted, watch, toRefs, computed,reactive,onBeforeUpdate } from 'vue'
-import {getCartList,setCartaddProduct} from '@/network/cart.js'
+import {getCartList,setCartaddProduct,setCartupdateProduct,setCartdeleteProduct} from '@/network/cart.js'
 export default {
     setup(){
+        const router = useRouter();
         let context=ref('')
         let isCheck =ref(false);
         let isCheckAll=ref(false);
+        let cartlist=reactive([]);
         let goods_detail=reactive([{
                 title:'红颜奶油草莓 约重500g/20-24颗 新鲜水果红颜奶油草莓 约重500g/20-24颗 新鲜水果红颜奶油草莓 约重500g/20-24颗 新鲜水果红颜奶油草莓 约重500g/20-24颗 新鲜水果',
                 price:120,
@@ -87,11 +90,25 @@ export default {
             }])
         let getcartList=async function(){
             let res =await getCartList();
-            // console.log(res);
+            console.log(res);
+            res.data.forEach((e,index)=>{
+                cartlist[index]={
+                    productId:e.productId,
+                    title:e.productName,
+                    price:e.price,
+                    amount:e.quantity,
+                    amountPrice:e.totalPrice,
+                    imgpath:e.productImage
+                }
+            })
+            console.log(cartlist);
         }
         let addProduct =async function(){
-            let res =await setCartaddProduct();
+            let res =await setCartaddProduct(2,1);
             console.log(res);
+        }
+        let updateProduct =async function(){
+            let res =await setCartupdateProduct();
         }
         let operate=function(op,index){
             console.log(op);
@@ -103,8 +120,11 @@ export default {
                 goods_detail[index].amountPrice=goods_detail[index].amount*goods_detail[index].price;
             }
         }
-        let deleteGoods = function(){
-            console.log('删除');
+        let deleteGoods =async function(index){
+            let res =await setCartdeleteProduct(cartlist[index].productId);
+            // router.replace('/cart');
+            router.go(0);
+            console.log('删除'+cartlist[index].productId);
         }
         let checkall=function(){
             console.log('全选');
@@ -141,6 +161,7 @@ export default {
             context,
             isCheckAll,
             checks,
+            cartlist,
             operate,
             deleteGoods,
             checkall,
@@ -236,12 +257,13 @@ input{
 }
 .cart_list img{
     margin-left: .5rem;
-    width:3rem;
-    height: 3rem;
+    padding: .5rem;
+    width:2.5rem;
+    height: 2.5rem;
 }
 .cart_list p{
     margin-left: 1.5rem;
-    margin-top: 1.2rem;
+    margin-top: 1.5rem;
     width: 8.5rem;
     height: .72rem;
     cursor: pointer;
@@ -255,12 +277,12 @@ input{
     color:#000;
 }
 .cart_list button{
-    margin-top: 1.2rem;
+    margin-top: 1.5rem;
     height:.6rem;
     padding: 0 .2rem;
 }
 .cart_list div{
-    margin-top: 1.2rem;
+    margin-top: 1.5rem;
 }
 .goods_amount{
     padding: .05rem .4rem ;
@@ -269,11 +291,12 @@ input{
 }
 .goods_price,
 .amount_price{
+    width: 1rem;
     margin: 0 .8rem;
     color:red;
 }
 .delete{
-    margin-left: 1.5rem;
+    margin-left: .8rem;
 }
 .delete:hover{
     color:red;

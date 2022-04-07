@@ -4,13 +4,32 @@ export function getCartList() {
         url: '/cart/list'
     })
 }
-export function setCartaddProduct() {
+export function setCartaddProduct(productId, count) {
     return request({
         method: 'POST',
         url: '/cart/add',
-        data: {
-            productld: 5,
-            count: 1
+        params: {
+            productId,
+            count
+        }
+    })
+}
+export function setCartupdateProduct(productId, count) {
+    return request({
+        method: 'POST',
+        url: '/cart/update',
+        params: {
+            productId,
+            count
+        }
+    })
+}
+export function setCartdeleteProduct(productId) {
+    return request({
+        method: 'POST',
+        url: '/cart/delete',
+        params: {
+            productId
         }
     })
 }
