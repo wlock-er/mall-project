@@ -47,7 +47,8 @@ export default {
       //      console.log(res.data);
       // })
       else{
-        this.$store.commit('loginSuccess')
+        this.$store.dispatch('getLogS');
+        // this.$store.commit('loginSuccess')
         this.$router.replace('/home');
       }
     },

@@ -20,7 +20,7 @@
        </div>
        <div class="cart_list_wrap">
            <div class="cart_list" v-for="(item,index) in goods_detail" :key="index" >
-               <input type="checkbox" @click="checkthis" :checked="isCheck" ref="checks">
+               <input type="checkbox" @click="checkthis" :checked="isCheck" :ref="el => { if (el) checks.push(el) }">
                <img src="http://demo.mxyhn.xyz:8020/cssthemes6/2.08ZF06/images/goods/goods003.jpg" alt="">
                <p class="goods_content">{{item.title}}</p>
                <div class="goods_price">￥{{item.price}}</div>
@@ -41,19 +41,20 @@
                 <div>合计：<span>￥1230</span></div>
                 <div>共计：<span>2</span>件商品</div>
             </div>
-            <div class="buyChecked">结算</div>
+            <div class="buyChecked" @click="addProduct">结算</div>
        </div>
     </div>
 </template>
 
 <script>
+import { ref, onMounted, watch, toRefs, computed,reactive,onBeforeUpdate } from 'vue'
+import {getCartList,setCartaddProduct} from '@/network/cart.js'
 export default {
-    name:'cart',
-    data(){
-        return{
-            isCheck:false,
-            isCheckAll:false,
-            goods_detail:[{
+    setup(){
+        let context=ref('')
+        let isCheck =ref(false);
+        let isCheckAll=ref(false);
+        let goods_detail=reactive([{
                 title:'红颜奶油草莓 约重500g/20-24颗 新鲜水果红颜奶油草莓 约重500g/20-24颗 新鲜水果红颜奶油草莓 约重500g/20-24颗 新鲜水果红颜奶油草莓 约重500g/20-24颗 新鲜水果',
                 price:120,
                 amount:1,
@@ -83,50 +84,70 @@ export default {
                 price:120,
                 amount:1,
                 amountPrice:120
-            }]
+            }])
+        let getcartList=async function(){
+            let res =await getCartList();
+            // console.log(res);
         }
-    },
-    mounted(){
-        window.addEventListener('scroll',()=>{
-            // let scrollTop = this.$refs.bottom.pageYOffset ||  this.$refs.bottom.scrollTop;
-            let scrollTop = window.scrollTop;
-            console.log(scrollTop);
-        })
-    },
-    computed:{
-        amountPrice(){
-            return this.amount*this.price;
+        let addProduct =async function(){
+            let res =await setCartaddProduct();
+            console.log(res);
         }
-    },
-    methods:{
-        operate(op,index){
-            if(op==='-' && this.goods_detail[index].amount>1){
-                this.goods_detail[index].amount--;
-                this.goods_detail[index].amountPrice=this.goods_detail[index].amount*this.goods_detail[index].price;
+        let operate=function(op,index){
+            console.log(op);
+            if(op==='-' && goods_detail[index].amount>1){
+                goods_detail[index].amount--;
+                goods_detail[index].amountPrice=goods_detail[index].amount*goods_detail[index].price;
             }else if(op==='+'){
-                this.goods_detail[index].amount++;
-                this.goods_detail[index].amountPrice=this.goods_detail[index].amount*this.goods_detail[index].price;
+                goods_detail[index].amount++;
+                goods_detail[index].amountPrice=goods_detail[index].amount*goods_detail[index].price;
             }
-        },
-        deleteGoods(){
+        }
+        let deleteGoods = function(){
             console.log('删除');
-        },
-        checkall(){
+        }
+        let checkall=function(){
             console.log('全选');
-            this.isCheckAll= !this.isCheckAll
-            this.isCheck = this.isCheckAll
-        },
-        checkthis(){
-            let checks = this.$refs.checks.map(v=>{
+            isCheckAll.value= !isCheckAll.value
+            isCheck.value = isCheckAll.value
+        }
+        const checks=ref([]); //input元素数组
+        let checkthis=function(){
+            let Lchecks = checks._rawValue.map(v=>{
                 return v.checked;
             })
-            this.isCheckAll=true;
-            console.log(checks);
-            checks.forEach(v=>{
+            isCheckAll.value=true;
+            console.log(Lchecks);
+            Lchecks.forEach(v=>{
                 if(!v){
-                    this.isCheckAll=false;
+                    isCheckAll.value=false;
                 }
             })
+        }
+        let getscroll=function(){
+            window.addEventListener('scroll',()=>{
+            // let scrollTop = this.$refs.bottom.pageYOffset ||  this.$refs.bottom.scrollTop;
+            let scrollTop = window.scrollTop;
+            // console.log(scrollTop);
+            })
+        }
+        onBeforeUpdate(() => {
+            checks.value = []
+        })
+        onMounted(getcartList)
+        return{
+            goods_detail,
+            isCheck,
+            context,
+            isCheckAll,
+            checks,
+            operate,
+            deleteGoods,
+            checkall,
+            checkthis,
+            getcartList,
+            getscroll,
+            addProduct
         }
     }
 }

@@ -31,7 +31,7 @@
       </div>
     </div>
 
-    <div class="categorypb_wrap">
+    <!-- <div class="categorypb_wrap">
       <div class="pb_title">新鲜水果</div>
       <div class="pb_content">
          <div class="pb_content_list" v-for="item in goods_list" :key="item">
@@ -40,45 +40,15 @@
            <p class="pb_price">￥{{item.price}}</p>
          </div>
       </div>
-    </div>
-    <div class="categorypb_wrap">
-      <div class="pb_title">海鲜水产</div>
+    </div> -->
+    <div class="categorypb_wrap" v-for="item in category" :key="item">
+      <div class="pb_title">{{item.name}}</div>
       <div class="pb_content">
-         <div class="pb_content_list" v-for="item in goods_list" :key="item">
+         <div class="pb_content_list" v-for="item2 in goods_list" :key="item2"> 
            <img src="http://demo.mxyhn.xyz:8020/cssthemes6/2.08ZF06/images/goods/goods003.jpg" alt="">
-           <p class="pb_name">{{item.content}}</p>
-           <p class="pb_price">￥{{item.price}}</p>
-         </div>
-      </div>
-    </div>
-    <div class="categorypb_wrap">
-      <div class="pb_title">精选肉类</div>
-      <div class="pb_content">
-         <div class="pb_content_list" v-for="item in goods_list" :key="item">
-           <img src="http://demo.mxyhn.xyz:8020/cssthemes6/2.08ZF06/images/goods/goods003.jpg" alt="">
-           <p class="pb_name">{{item.content}}</p>
-           <p class="pb_price">￥{{item.price}}</p>
-         </div>
-      </div>
-    </div>
-    <div class="categorypb_wrap">
-      <div class="pb_title">冷冻饮食</div>
-      <div class="pb_content">
-         <div class="pb_content_list" v-for="item in goods_list" :key="item">
-           <img src="http://demo.mxyhn.xyz:8020/cssthemes6/2.08ZF06/images/goods/goods003.jpg" alt="">
-           <p class="pb_name">{{item.content}}</p>
-           <p class="pb_price">￥{{item.price}}</p>
-         </div>
-      </div>
-    </div>
-    <div class="categorypb_wrap">
-      <div class="pb_title">蔬菜蛋品</div>
-      <div class="pb_content">
-         <div class="pb_content_list" v-for="item in goods_list" :key="item">
-           <img src="http://demo.mxyhn.xyz:8020/cssthemes6/2.08ZF06/images/goods/goods003.jpg" alt="">
-           <p class="pb_name">{{item.content}}</p>
-           <p class="pb_price">￥{{item.price}}</p>
-         </div>
+           <p class="pb_name">{{item2.content}}</p>
+           <p class="pb_price">￥{{item2.price}}</p>
+         </div> 
       </div>
     </div>
     <el-backtop :right="40" :bottom="80" />
@@ -87,45 +57,71 @@
 
 <script>
 import MySwiper from '@/components/common/mswiper.vue'
+import { getHomeCategoryList ,getHomeProductDetail ,getHomeProductList } from '@/network/home.js'
+import { ref, onMounted, watch, toRefs, computed,reactive } from 'vue'
 export default {
-    name:'Home',
-    data(){
-      return{
-         context:'',
-         goods_list:[{
-           title:'新鲜水果',
-           content:'红颜奶油草莓 约重500g/20-24颗 新鲜水果',
-           price:22
-         },
-         {
-           title:'新鲜水果',
-           content:'红颜奶油草莓 约重500g/20-24颗 新鲜水果',
-           price:22
-         },
-         {
-           title:'新鲜水果',
-           content:'红颜奶油草莓 约重500g/20-24颗 新鲜水果',
-           price:22
-         },
-         {
-           title:'新鲜水果',
-           content:'红颜奶油草莓 约重500g/20-24颗 新鲜水果',
-           price:22
-         },
-         {
-           title:'新鲜水果',
-           content:'红颜奶油草莓 约重500g/20-24颗 新鲜水果',
-           price:22
-         }]
-        //  imgspath:['@/assets/img/swiper-img.jpg','@/assets/img/swiper-img.jpg','@/assets/img/swiper-img.jpg','@/assets/img/swiper-img.jpg']
-      }
-    },
     components:{
       MySwiper
     },
-    methods:{
-        
+    setup(props) {
+    let goods_list = [{
+           title:'新鲜水果',
+           content:'红颜奶油草莓 约重500g/20-24颗 新鲜水果',
+           price:22
+         },
+         {
+           title:'新鲜水果',
+           content:'红颜奶油草莓 约重500g/20-24颗 新鲜水果',
+           price:22
+         },
+         {
+           title:'新鲜水果',
+           content:'红颜奶油草莓 约重500g/20-24颗 新鲜水果',
+           price:22
+         },
+         {
+           title:'新鲜水果',
+           content:'红颜奶油草莓 约重500g/20-24颗 新鲜水果',
+           price:22
+         },
+         {
+           title:'新鲜水果',
+           content:'红颜奶油草莓 约重500g/20-24颗 新鲜水果',
+           price:22
+    }]
+    let category=reactive([]);
+    let context=ref('');
+    let getCategory = async function(){
+        let res = await getHomeCategoryList();
+        // console.log(res);
+        res.data.list.forEach((e,index) => {
+            if(index<=5){
+                    category[index]={
+                    id:e.id,
+                    name:e.name,
+                    detail:{}
+                  }
+            }
+          });
+          // setTimeout(()=>{
+            res.data.list.forEach(async (e,index)=>{
+            let res2 = await getHomeProductDetail(e.id);
+            console.log(res2);
+            if(index<=5){
+              category[index].detail=res2.data;
+            }
+          })
+        // },1000)
+        // console.log(category);
     }
+    onMounted(getCategory)
+    return {
+      getCategory,
+      context,
+      category,
+      goods_list
+    }
+  }
 }
 </script>
 
