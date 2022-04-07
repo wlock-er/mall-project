@@ -38,7 +38,7 @@
             </div>
             <div class="deleteChecked">删除选中商品</div>
             <div class="totalPrice">
-                <div>合计：<span>￥1230</span></div>
+                <div>合计：<span>￥{{totalprice}}</span></div>
                 <div>共计：<span>2</span>件商品</div>
             </div>
             <div class="buyChecked" @click="addProduct">结算</div>
@@ -103,26 +103,26 @@ export default {
             })
             console.log(cartlist);
         }
-        let addProduct =async function(){
-            let res =await setCartaddProduct(2,1);
-            console.log(res);
-        }
-        let updateProduct =async function(){
-            let res =await setCartupdateProduct();
-        }
-        let operate=function(op,index){
+
+        let totalprice=computed(()=>{
+            let sum =0;
+            cartlist.forEach(e=>{
+                sum+=e.amountPrice;
+            })
+            return sum
+        })
+        let operate=async function(op,index){
             console.log(op);
-            if(op==='-' && goods_detail[index].amount>1){
-                goods_detail[index].amount--;
-                goods_detail[index].amountPrice=goods_detail[index].amount*goods_detail[index].price;
+            if(op==='-' && cartlist[index].amount>1){
+                let res =await setCartupdateProduct(cartlist[index].productId,--cartlist[index].amount);
+                console.log(res);
             }else if(op==='+'){
-                goods_detail[index].amount++;
-                goods_detail[index].amountPrice=goods_detail[index].amount*goods_detail[index].price;
+                let res =await setCartupdateProduct(cartlist[index].productId,++cartlist[index].amount);
+                console.log(res);
             }
         }
         let deleteGoods =async function(index){
             let res =await setCartdeleteProduct(cartlist[index].productId);
-            // router.replace('/cart');
             router.go(0);
             console.log('删除'+cartlist[index].productId);
         }
@@ -168,7 +168,7 @@ export default {
             checkthis,
             getcartList,
             getscroll,
-            addProduct
+            totalprice
         }
     }
 }
@@ -257,7 +257,7 @@ input{
 }
 .cart_list img{
     margin-left: .5rem;
-    padding: .5rem;
+    padding: .5rem 0 .5rem .5rem;
     width:2.5rem;
     height: 2.5rem;
 }
