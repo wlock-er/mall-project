@@ -1,13 +1,10 @@
 <template>
     <div class="cart">
-       <div class="top_wrap">
-          <img src="@/assets/img/logo.png" alt="">
-          <div class="cart_top">|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;购物车</div>
-          <div class="search_wrap iconfont icon-search"></div>
-          <div class="input_wrap">
-               <el-input v-model="context" placeholder="请输入关键词"></el-input>
-          </div>
-       </div>
+       <search-bar>
+           <template v-slot:cartTop>
+               |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;购物车
+           </template>
+       </search-bar>
        <div class="cart_title">
            <div class="title_list">
                <input type="checkbox" @click="checkall" :checked="isCheckAll">
@@ -20,9 +17,9 @@
        </div>
        <div class="cart_list_wrap">
            <div class="cart_list" v-for="(item,index) in cartlist" :key="index" >
-               <input type="checkbox" @click="checkthis" :checked="isCheck" :ref="el => { if (el) checks.push(el) }">
+               <input type="checkbox" @click="checkthis(item.productId,index)" :checked="item.selected">
                <img :src="item.imgpath" alt="">
-               <p class="goods_content">{{item.title}}</p>
+               <p class="goods_content" @click="goDetail(item.productId)">{{item.title}}</p>
                <div class="goods_price">￥{{item.price}}</div>
                <button @click="operate('-',index)">-</button>
                <div class="goods_amount">{{item.amount}}</div>
@@ -39,7 +36,7 @@
             <div class="deleteChecked">删除选中商品</div>
             <div class="totalPrice">
                 <div>合计：<span>￥{{totalprice}}</span></div>
-                <div>共计：<span>2</span>件商品</div>
+                <div>共计：<span>{{productQuantity}}</span>件商品</div>
             </div>
             <div class="buyChecked" @click="addProduct">结算</div>
        </div>
@@ -47,14 +44,18 @@
 </template>
 
 <script>
+import { ElMessage } from 'element-plus'
+import SearchBar from '@/components/common/search.vue'
 import { useRouter } from "vue-router"
 import { ref, onMounted, watch, toRefs, computed,reactive,onBeforeUpdate } from 'vue'
-import {getCartList,setCartaddProduct,setCartupdateProduct,setCartdeleteProduct} from '@/network/cart.js'
+import {getCartList,selectAllItorNot,selectItorNot,setCartupdateProduct,setCartdeleteProduct,createOrder} from '@/network/cart.js'
 export default {
+    components:{
+        SearchBar
+    },
     setup(){
         const router = useRouter();
         let context=ref('')
-        let isCheck =ref(false);
         let isCheckAll=ref(false);
         let cartlist=reactive([]);
         let goods_detail=reactive([{
@@ -90,7 +91,7 @@ export default {
             }])
         let getcartList=async function(){
             let res =await getCartList();
-            console.log(res);
+            // console.log(res);
             res.data.forEach((e,index)=>{
                 cartlist[index]={
                     productId:e.productId,
@@ -98,7 +99,8 @@ export default {
                     price:e.price,
                     amount:e.quantity,
                     amountPrice:e.totalPrice,
-                    imgpath:e.productImage
+                    imgpath:e.productImage,
+                    selected:e.selected
                 }
             })
             console.log(cartlist);
@@ -107,12 +109,24 @@ export default {
         let totalprice=computed(()=>{
             let sum =0;
             cartlist.forEach(e=>{
-                sum+=e.amountPrice;
+                if(e.selected){
+                    sum+=e.amountPrice;
+                }
             })
             return sum
         })
+        let productQuantity=computed(()=>{
+            let sum=0;
+            cartlist.forEach(e=>{
+                if(e.selected){
+                    sum+=e.amount;
+                }
+            })
+            return sum;
+        })
         let operate=async function(op,index){
             console.log(op);
+            console.log(cartlist[index].amount);
             if(op==='-' && cartlist[index].amount>1){
                 let res =await setCartupdateProduct(cartlist[index].productId,--cartlist[index].amount);
                 console.log(res);
@@ -120,29 +134,33 @@ export default {
                 let res =await setCartupdateProduct(cartlist[index].productId,++cartlist[index].amount);
                 console.log(res);
             }
+            cartlist[index].amountPrice=cartlist[index].price*cartlist[index].amount;
         }
         let deleteGoods =async function(index){
             let res =await setCartdeleteProduct(cartlist[index].productId);
             router.go(0);
             console.log('删除'+cartlist[index].productId);
         }
-        let checkall=function(){
+        let checkall=async function(){
             console.log('全选');
-            isCheckAll.value= !isCheckAll.value
-            isCheck.value = isCheckAll.value
-        }
-        const checks=ref([]); //input元素数组
-        let checkthis=function(){
-            let Lchecks = checks._rawValue.map(v=>{
-                return v.checked;
+            isCheckAll.value= !isCheckAll.value;
+            cartlist.forEach(e=>{
+                e.selected=isCheckAll.value
             })
+            console.log(isCheckAll.value);
+            let res=await selectAllItorNot(isCheckAll.value?1:0);
+            console.log(res);
+        }
+        let checkthis=async function(id,index){
             isCheckAll.value=true;
-            console.log(Lchecks);
-            Lchecks.forEach(v=>{
-                if(!v){
+            cartlist[index].selected=!cartlist[index].selected;
+            cartlist.forEach(e=>{
+                if(!e.selected){
                     isCheckAll.value=false;
                 }
             })
+            let res=await selectItorNot(id,cartlist[index].selected?1:0);
+            console.log(res);
         }
         let getscroll=function(){
             window.addEventListener('scroll',()=>{
@@ -151,16 +169,20 @@ export default {
             // console.log(scrollTop);
             })
         }
-        onBeforeUpdate(() => {
-            checks.value = []
-        })
+        let addProduct =async function(){
+            let res = await createOrder();
+            ElMessage('已生成订单，待支付！')
+            router.replace('/order');
+            console.log(res);
+        }
+        let goDetail=function(id){
+            router.replace('/home/detail?id='+id);
+        }
         onMounted(getcartList)
         return{
             goods_detail,
-            isCheck,
             context,
             isCheckAll,
-            checks,
             cartlist,
             operate,
             deleteGoods,
@@ -168,7 +190,10 @@ export default {
             checkthis,
             getcartList,
             getscroll,
-            totalprice
+            totalprice,
+            productQuantity,
+            addProduct,
+            goDetail
         }
     }
 }
@@ -265,7 +290,7 @@ input{
     margin-left: 1.5rem;
     margin-top: 1.5rem;
     width: 8.5rem;
-    height: .72rem;
+    height: .82rem;
     cursor: pointer;
     display: -webkit-box;
     overflow: hidden;
@@ -280,6 +305,8 @@ input{
     margin-top: 1.5rem;
     height:.6rem;
     padding: 0 .2rem;
+    background-color: rgb(245, 247, 250);
+    border: 1px solid rgb(207, 207, 207);   
 }
 .cart_list div{
     margin-top: 1.5rem;

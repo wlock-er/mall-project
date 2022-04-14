@@ -12,6 +12,12 @@
           <input ref="password" type="password" placeholder="请输入密码" @input="blurinput">
           <div class="worring">{{message}}</div>
           <el-button type="primary" size="large" @click="clicklogin">登录</el-button>
+          <p class="register" ref="regis" @click="Toregister">没有账号，去注册</p>
+          <div class="freestyle">————————&nbsp;&nbsp;商城&nbsp;&nbsp;————————</div>
+          <div class="instruction_wrap">
+            <span class="instruction">用户协议</span>
+            <span class="instruction">隐私条款</span>
+          </div>
       </div>
   </div>
 </template>
@@ -36,20 +42,13 @@ export default {
       else if(this.$refs.password.value.length<6){
         this.message='密码必须大于六位'
       }
-      // request({
-      //   method:'POST',
-      //   url: '/login',
-      //   data: {
-      //       userName: 'zhang',
-      //       password: 12345678
-      //   }
-      // }).then(res=>{
-      //      console.log(res.data);
-      // })
       else{
         this.$store.dispatch('getLogS');
         // this.$store.commit('loginSuccess')
-        this.$router.replace('/home');
+        console.log('跳转');
+        setTimeout(()=>{
+          this.$router.replace('/home');
+        },1000)
       }
     },
     blurinput(){
@@ -61,10 +60,15 @@ export default {
     clickSelect(i){
       this.isSelect=i;
       if(i==2){
+        this.$refs.regis.style.display='none'
         this.$refs.wrap.style.backgroundColor='rgb(245, 245, 227)';
       }else{
+        this.$refs.regis.style.display='flex';
          this.$refs.wrap.style.backgroundColor='#f6f8fa';
       }
+    },
+    Toregister(){
+      this.$router.replace('/register');
     }
   }
 }
@@ -76,7 +80,7 @@ export default {
 }
 .input_wrap{
   width: 7rem;
-  height:7rem;
+  /* height:7.4rem; */
   position: absolute;
   top: 50%;
   left: 50%;
@@ -88,7 +92,7 @@ export default {
 .tips{
   /* text-align: center; 会改变位置*/
   position: absolute;
-  top: 5%;
+  top: 4%;
   left: 50%;
   transform: translate(-50%,-50%);
   margin-top: 2rem ;
@@ -127,9 +131,33 @@ export default {
    color: red;
 }
 .el-button{
-  margin-top: .5rem;
-  margin-left: .78rem;
+  margin: .5rem 0 .3rem .78rem;
   width: 5.5rem;
   height: .85rem;
+}
+.register{
+  /* text-align:center ; */
+  margin: .01rem 0 0.31rem 2.25rem  ;
+  cursor: pointer;
+  color: rgb(0, 174, 255);
+}
+.register:hover{
+  color: rgb(0, 55, 157);
+}
+.instruction_wrap{
+  padding-top: .13rem;
+  /* border-top: 1px solid rgb(121, 121, 121); */
+  text-align: center;
+}
+.instruction{
+  margin: .3rem 0 0.21rem 0.2rem  ;
+  cursor: pointer;
+  color: rgb(0, 174, 255);
+}
+.freestyle{
+  text-align:center;
+}
+.instruction:hover{
+  text-decoration: underline;
 }
 </style>

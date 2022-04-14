@@ -8,23 +8,24 @@ export function getHomeCategoryList() {
         }
     })
 }
-export function getHomeProductDetail(id) {
-    return request({
-        url: '/product/detail',
-        params: {
-            id
-        }
-    })
-}
-export function getHomeProductList() {
+
+export function getHomeProductList(id) {
     return request({
         url: '/product/list',
         params: {
             orderBy: 'price asc',
-            categoryId: 3,
-            keyword: '桃',
+            categoryId: id,
             pageNum: 1,
             pageSize: 10
+        }
+    })
+}
+export function getGoodsListProductList() {
+    return request({
+        url: '/admin/product/list',
+        params: {
+            pageNum: 1,
+            pageSize: 70
         }
     })
 }

@@ -33,3 +33,33 @@ export function setCartdeleteProduct(productId) {
         }
     })
 }
+export function createOrder() {
+    return request({
+        method: 'POST',
+        url: '/order/create',
+        params: {
+            receiverName: "小慕",
+            receiverMobile: "18888888888",
+            receiverAddress: "中国慕城"
+        }
+    })
+}
+export function selectItorNot(productId, selected) {
+    return request({
+        method: 'POST',
+        url: '/cart/select',
+        params: {
+            productId,
+            selected
+        }
+    })
+}
+export function selectAllItorNot(selected) {
+    return request({
+        method: 'POST',
+        url: '/cart/selectAll',
+        params: {
+            selected
+        }
+    })
+}

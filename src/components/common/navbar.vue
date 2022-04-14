@@ -10,8 +10,8 @@
         <div class="nav" :class="{navclick: path=='/#'}" @click="ClickNav('#')">个人中心</div> -->
         <div v-if="!$store.state.isLoginSuccess">
             <!-- <a class="nav" href="http://localhost:8080/login" target="_blank">登录</a> -->
-            <div v-if="!(this.path==='/login')" class="nav" :class="{navclick: path=='/login'}" @click="ClickNav('/login')">登录</div>
-            <div v-if="!(this.path==='/register')" class="nav" :class="{navclick: path=='/register'}" @click="ClickNav('/register')">注册</div>
+            <div v-if="!(path==='/login')" class="nav" :class="{navclick: path=='/login'}" @click="ClickNav('/login')">登录</div>
+            <div v-if="!(path==='/register')" class="nav" :class="{navclick: path=='/register'}" @click="ClickNav('/register')">注册</div>
         </div>
         <div v-else>
             <div class="nav" :class="{navclick: path=='/order'}" @click="ClickNav('/order')">我的订单</div>
@@ -50,7 +50,7 @@ export default {
     watch:{
         $route(to, from){
         this.path=to.path;
-        console.log(to.path);
+        // console.log(to.path);
     }
     }
 }
@@ -70,10 +70,10 @@ body{
 }
 .nav_left{
     flex: 4;
-    padding:  .2rem;
+    padding:  .15rem;
 }
 .nav_left span{
-    vertical-align: middle;
+    vertical-align: top;
     transition: all 0.5s;
 }
 .nav_right{
@@ -81,7 +81,7 @@ body{
 }
 .nav{
     float: right;
-    padding: 0.2rem .2rem .2rem 0.2rem;
+    padding: 0.15rem .2rem .15rem 0.2rem;
     margin: 0 .2rem;
     transition: all 0.3s;
 }

@@ -2,6 +2,7 @@
   <!-- <nav-bar v-show="!(this.path === '/login' ||this.path === '/register')"></nav-bar> -->
   <nav-bar></nav-bar>
   <router-view/>
+  <el-backtop :right="40" :bottom="80" />
 </template>
 <script>
 import NavBar from "@/components/common/navbar.vue"
@@ -18,10 +19,10 @@ export default{
     this.path=this.$route.path;
   },
   watch:{
-    $route(to, from){
-      this.path=to.path;
-      console.log(to.path);
-    }
+    // $route(to, from){
+    //   this.path=to.path;
+    //   console.log(to.path);
+    // }
   }
 }
 </script>
