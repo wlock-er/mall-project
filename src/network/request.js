@@ -19,28 +19,3 @@ export function request(config) {
     }
     return instance(config)
 }
-
-
-// 使————也可以再封装一个函数
-// import {request} from "@/network/request.js"
-// clickbtn(){
-//  request({
-//     url: '/category/list',
-//     // params: {
-//     //     pageNum: 1,
-//     //     pageSize: 10
-//     // }
-// }).then(res=>{
-//     console.log(res.data);
-// })
-//      request({
-//         method:'POST',
-//         url: '/adminLogin',
-//         data: {
-//             userName: 'cfasvffver',
-//             password: 12345678
-//         }
-//     }).then(res=>{
-//         console.log(res.data);
-//     })
-// }

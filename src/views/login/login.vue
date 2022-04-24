@@ -7,9 +7,10 @@
           <span class="login_options" @click="clickSelect(2)" :class="{beChoice: isSelect===2}">管理员</span>
           </div>
           <div>用户名</div>
-          <input ref="username" type="text" placeholder="请输入用户名" @input="blurinput">
+          <input class="inputbox" ref="username" type="text" placeholder="请输入用户名" @input="blurinput">
           <div>密码</div>
-          <input ref="password" type="password" placeholder="请输入密码" @input="blurinput">
+          <input class="inputbox" ref="password" type="password" placeholder="请输入密码" @input="blurinput">
+          <input class="remeber" type="checkbox" v-model="checked" @click="isRemeberMe"><span class="remebertext">记住我</span>
           <div class="worring">{{message}}</div>
           <el-button type="primary" size="large" @click="clicklogin">登录</el-button>
           <p class="register" ref="regis" @click="Toregister">没有账号，去注册</p>
@@ -29,26 +30,35 @@ export default {
   data(){
     return{
        message:'',
-       isSelect:1
+       isSelect:1,
+       checked:true
     }
   },
   methods:{
-    clicklogin(){
-      console.log(this.$refs.username.value);
-      console.log(this.$refs.password.value);
-      if(this.$refs.username.value ==''){
+    async clicklogin(){
+      let name=this.$refs.username.value;
+      let pwd = this.$refs.password.value;
+      let prop={
+        name,
+        pwd
+      }
+      if(name ==''){
         this.message='用户名不能为空'
       }
-      else if(this.$refs.password.value.length<6){
+      else if(pwd.length<6){
         this.message='密码必须大于六位'
       }
       else{
-        this.$store.dispatch('getLogS');
-        // this.$store.commit('loginSuccess')
-        console.log('跳转');
-        setTimeout(()=>{
-          this.$router.replace('/home');
-        },1000)
+        let isRight = await this.$store.dispatch('getLogS',prop);//promise对象
+        console.log(isRight);
+        if(isRight){
+          console.log('跳转');
+          // setTimeout(()=>{
+            this.$router.replace('/home');
+          // },1500)
+        }else{
+          this.message='用户名或密码错误'
+        }
       }
     },
     blurinput(){
@@ -61,14 +71,19 @@ export default {
       this.isSelect=i;
       if(i==2){
         this.$refs.regis.style.display='none'
-        this.$refs.wrap.style.backgroundColor='rgb(245, 245, 227)';
+        this.$refs.wrap.style.backgroundColor='rgba(227, 233, 245, 0.714)';
+        this.message=''
       }else{
         this.$refs.regis.style.display='flex';
-         this.$refs.wrap.style.backgroundColor='#f6f8fa';
+         this.$refs.wrap.style.backgroundColor='#f6f8faaa';
+         this.message=''
       }
     },
     Toregister(){
       this.$router.replace('/register');
+    },
+    isRemeberMe(){
+      this.$store.commit('isRemeb',!this.checked);
     }
   }
 }
@@ -76,7 +91,11 @@ export default {
 
 <style scoped>
 .login{
-  color: gray;
+  /* background-color: antiquewhite; */
+  color: rgb(109, 109, 109);
+  height: 94.5vh;
+  background: url('@/assets/img/bgc2.jpg');
+  background-position: -220px -500px;
 }
 .input_wrap{
   width: 7rem;
@@ -86,13 +105,14 @@ export default {
   left: 50%;
   transform: translate(-50%,-50%);
   padding: .1rem .5rem;
-  background-color: #f6f8fa;
-  box-shadow: 10px 0 10px rgb(170, 170, 170);
+  background-color: #f6f8faaa;
+  /* box-shadow: 10px 0 10px rgb(170, 170, 170); */
 }
 .tips{
   /* text-align: center; 会改变位置*/
+  color: rgba(255, 255, 255, 0.714);
   position: absolute;
-  top: 4%;
+  top: -0.5%;
   left: 50%;
   transform: translate(-50%,-50%);
   margin-top: 2rem ;
@@ -119,7 +139,7 @@ export default {
   color: rgb(0, 174, 255);
   background-color: rgba(143, 143, 143, 0.089);
 }
-.input_wrap input{
+.inputbox{
   width: 6.7rem;
   height: .3rem;
   padding: .2rem;
@@ -128,10 +148,10 @@ export default {
 .worring{
   margin-top:.1rem ;
    text-align: center;
-   color: red;
+   color: rgb(207, 0, 0);
 }
 .el-button{
-  margin: .5rem 0 .3rem .78rem;
+  margin: .3rem 0 .3rem .78rem;
   width: 5.5rem;
   height: .85rem;
 }
@@ -159,5 +179,13 @@ export default {
 }
 .instruction:hover{
   text-decoration: underline;
+}
+
+.remeber{
+  margin: .25rem .2rem;
+  /* float: left; */
+}
+.remebertext{
+  color: #000;
 }
 </style>

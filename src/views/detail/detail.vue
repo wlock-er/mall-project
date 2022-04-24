@@ -2,57 +2,72 @@
   <div class="detail_wrap">
       <search-bar>
         <template v-slot:cart >
+          <el-badge :value="cartSize" class="cart_item">
               <div class="my_cart">
-                <span class="iconfont icon-cart"></span>
+                 <span class="iconfont icon-cart"></span>
                  <p>我的购物车</p>
               </div>
+           </el-badge>
         </template>
       </search-bar>
       <div class="detail">
         <div class="demo-image__preview">
            <el-image
-             style="width: 10rem; height: 10rem"
-             :src="detail.image"
-             :preview-src-list="src_list"
-             :initial-index="4"
+             style="width: 8.5rem; height: 8.5rem"
+             :src="bigImg"
+             :preview-src-list="detail.images"
+             :initial-index="bigImgIndex"
              fit="cover"
            />
-          <!-- <el-image v-if='detail.image==null'>
-            <template #error>
-            <div class="image-slot">
-              <el-icon><icon-picture /></el-icon>
-            </div>
-          </template>
-        </el-image> -->
+           <div class="smallImg" v-for="(item, index) in detail.images" :key="item">
+             <el-image 
+             @mouseover="mousroverImg(index)"
+             :src="item"
+             :preview-src-list="detail.images"
+             :initial-index="index"
+             fit="cover"
+           />
+           </div>
         </div>
         <div class="detail_right">
           <div class="goods_infor_wrap">
-            <div class="detail_name">{{detail.name}}</div>
-            <div class="detail_price">￥{{detail.price}}</div>
-            <div class="detail_stock"><span>库存</span>{{detail.stock}}</div>
-            <div class="detail_details" v-for="item in detail.detail" :key="item">{{item}}</div>
-          </div>
-          <el-input-number
-            v-model="num"
-            :min="1"
-            :max="5"
-            controls-position="right"
-            size="large"
-            @change="handleChange"
-          />
-          <div class="addIncart" @click="addInCart(detail.id,num)">
-            加入购物车
+            <div class="detail_name"><div class="detail_stock"><span>库存</span>{{detail.stock}}</div>{{detail.name}}</div>
+            <!-- <div class="detail_stock"><span>库存</span>{{detail.stock}}</div> -->
+            <div class="detail_price_more">原价：<s>￥{{detail.price+3}}</s></div>
+            <div class="detail_price">秒杀价：<span>￥{{detail.price}}</span></div>
+            <div class="detail_address">配送至：<span>{{address}}</span></div>
+            <div class="detail_address">快递：<span>免运费</span></div>
+            <div class="detail_address">服务：<span>48小时内发货</span></div>
+            <div class="detail_address">保障：<span>7天无理由退货</span></div>
+            <span>数量：</span>
+            <el-input-number
+              v-model="num"
+              :min="1"
+              :max="5"
+              controls-position="right"
+              size="large"
+              @change="handleChange"
+            />
+            <div class="addIncart" @click="addInCart(detail.id,num)">
+              加入购物车
+            </div>
           </div>
         </div>
+      </div>
+      <div class="detail_details_wrap">
+        <div class="details_head">商品详情</div>
+        <div class="detail_details" v-for="item in detail.detail" :key="item">{{item}}</div>
       </div>
   </div>
 </template>
 
 <script>
+import { useStore } from "vuex";
 import { ElMessage } from 'element-plus'
 import { Picture as IconPicture } from '@element-plus/icons-vue'
 import SearchBar from '@/components/common/search.vue'
 import { useRouter,useRoute } from "vue-router"
+import {getUserDtail} from '@/network/order.js'
 import { getProductDetail ,addProductInCart} from '@/network/detail.js'
 import {selectItorNot} from '@/network/cart.js'
 import { ref, onMounted, watch, toRefs, computed,reactive } from 'vue'
@@ -62,26 +77,34 @@ export default {
     IconPicture
   },
   setup(){
-    let num = ref(1)
+    const store = new useStore(); 
+    let num = ref(1);
     const handleChange = (value) => {
       console.log(value)
     }
     let detail =ref({});
     let route =useRoute();
-    let src_list=ref([]);
+    let cartSize=ref(0);
+    let bigImgIndex=ref(0);
+    let bigImg=ref('');
+    let address=ref('');
     let getdetail= async function(){
+
       let  res = await getProductDetail(route.query.id);
-      // console.log(res.data);
+      console.log(res.data);
       detail.value=res.data;
-      let redetail1=detail.value.detail.replaceAll('商',' 商');
-      let redetail2=redetail1.replace('类别',' 类别').replace('分类',' 分类');
-      let redetail3=redetail2.replace('包',' 包');
-      let redetail4=redetail3.replace('国产/',' 国产/');
-      let redetail=redetail4.replace('原',' 原').replace('货号',' 货号').replace('店铺',' 店铺').replace('售卖',' 售卖').replace('烹饪建议',' 烹饪建议').replace('品种',' 品种').replace('热卖时间',' 热卖时间').replace('饲养方式',' 饲养方式').replace('保存状态',' 保存状态').replace('重量',' 重量').replace('套餐份量',' 套餐份量').replace('套餐周期',' 套餐周期').replace('是否',' 是否').replace('单箱规',' 单箱规');
-      let redetails=redetail.split(' ');
+      let redetails=res.data.detail.split('#');
+      let images=res.data.image.split('#');
       detail.value.detail=redetails;
-      src_list.value.push(detail.value.image);
+      detail.value.images=images;
+      bigImg.value=detail.value.images[0];
+      store.dispatch('getCartS');
+      setTimeout(()=>{
+        cartSize.value=store.state.cartSize;
+      },500)
       console.log(detail.value);
+      let res2 =await getUserDtail();
+      address.value=res2.data.address;
     }
     //加入购物车
     let addInCart = async function(id,count){
@@ -89,16 +112,30 @@ export default {
       //初始化不选中
       selectItorNot(id,0)
       console.log(res);
+      store.dispatch('getCartS');
+      setTimeout(()=>{
+        cartSize.value=store.state.cartSize;
+      },500)
       ElMessage('加入购物车成功！')
+    }
+
+    let mousroverImg = function(index){
+      // console.log(index);
+      bigImg.value= detail.value.images[index];
+      bigImgIndex.value=index;
     }
     onMounted(getdetail)
     return {
       detail,
-      src_list,
       num,
+      cartSize,
+      bigImg,
+      bigImgIndex,
+      address,
       getdetail,
       handleChange,
-      addInCart
+      addInCart,
+      mousroverImg
     }
   }
 }
@@ -109,14 +146,19 @@ export default {
   margin:0 3rem ;
 }
 .my_cart{
-  float: right;
+  cursor: pointer;
+  /* float: right; */
   color: rgb(211, 25, 25);
   font-size: .3rem;
   width: 2.3rem;
   height: .58rem ;
   padding-left: .15rem;
-  margin: 1.2rem 2rem 0 1.5rem;
+  /* margin: 1.2rem 2rem 0 1.5rem; */
   border: 1px solid rgb(187, 187, 187);
+}
+.cart_item{
+  float: right;
+  margin: 1.2rem 2rem 0 1.5rem;
 }
 .my_cart p{
   display: inline-block;
@@ -132,13 +174,30 @@ export default {
 .detail:nth-child(n){
   flex: 1;
 }
-.detail img,
+.demo-image__preview{
+  width: 8.5rem;
+  height: 8.5rem;
+  margin-bottom: 2rem;
+}
+/* .detail img,
 .el-image{
-  width: 10rem;
-  height: 10rem;
+  width: 1rem;
+  height: 1rem;
+} */
+.smallImg{
+  float: left;
+  margin:.12rem .05rem;
+  border: 0.02rem solid rgb(255, 255, 255);
+}
+.smallImg .el-image{
+  width: 1.2rem; 
+  height: 1.2rem; 
+}
+.smallImg:hover{
+  border: 0.02rem solid rgb(255, 0, 0);
 }
 .detail_right{
-  width: 13.5rem;
+  width: 15rem;
   /* background-color: #fff; */
   margin-left:1rem;
   margin-bottom: .5rem;
@@ -146,41 +205,46 @@ export default {
 }
 .goods_infor_wrap{
   padding: .3rem;
-  /* background-color: #fff; */
-  /* height: 9.5rem;
-  overflow-y: scroll; */
 }
 .detail_name{
-  margin-bottom: .3rem;
+  display: inline-block;
+  margin-bottom: .12rem;
   font-size: .45rem;
   font-weight: 600;
   color: gray;
 }
 .detail_stock{
+  float: right;
+  font-size: .34rem;
   display:inline-block;
   color: red;
 }
 .detail_stock span{
   color: #fff;
-  margin-left: .5rem;
+  margin-left: .25rem;
   margin-right: .1em;
   padding: .05rem .1rem;
   border-radius: 10px;
   background: -webkit-linear-gradient(left,red, rgb(255, 187, 0)); 
 }
-.detail_price{
-  display:inline;
-  margin: .5rem 0;
-  font-size: .5rem;
+
+.detail_price span{
+  font-size: .55rem;
   color:red;
+}
+.detail_price,
+.detail_price_more,
+.detail_address{
+  /* font-size: .36rem; */
+  margin: .45rem 0;
+  color: gray;
 }
 .detail_details{
   padding: .2rem 0;
 }
 .addIncart{
-  /* display: inline-block; */
-  /* float: right; */
-  float: left;
+  width: 3rem;
+  margin-top: .2rem;
   padding: .2rem 1rem;
   text-align: center;
   background-color: rgb(185, 0, 0);
@@ -188,8 +252,7 @@ export default {
   cursor: pointer;
 }
 .el-input-number{
-  float: left;
-  margin: 0rem .1rem 0 0;
+  margin: 0.2rem .1rem 0.3rem 0;
 }
  .image-slot {
   display: flex;
@@ -200,5 +263,16 @@ export default {
   background: var(--el-fill-color-light);
   color: var(--el-text-color-secondary);
   font-size: 30px;
+}
+
+.detail_details_wrap{
+  margin-top: .5rem;
+  padding: .5rem;
+  background-color: #fff;
+}
+.details_head{
+  font-size: .5rem;
+  font-weight: 600;
+  margin-bottom: .2rem;
 }
 </style>

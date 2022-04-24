@@ -1,6 +1,6 @@
 <template>
   <div class="top_wrap">
-          <img src="@/assets/img/logo.png" alt="">
+          <img @click="goHome" src="@/assets/img/logo.png" alt="">
           <div class="cart_top">
               <slot name="cartTop"></slot>
           </div>
@@ -29,10 +29,14 @@ export default {
       console.log(contend.value);
       router.replace('/search?contend='+contend.value)
     }
+    let goHome = ()=>{
+       router.replace('/home')
+    }
     return{
       contend,
       goCart,
-      seacrh
+      seacrh,
+      goHome
     }
   }
 }
@@ -47,6 +51,9 @@ export default {
 .top_wrap img{
   float: left;
   width:6rem;
+}
+.top_wrap img:hover{
+  cursor: pointer;
 }
 .cart_top{
     float: left;

@@ -37,10 +37,13 @@ export function createOrder() {
     return request({
         method: 'POST',
         url: '/order/create',
-        params: {
+        data: JSON.stringify({
             receiverName: "小慕",
             receiverMobile: "18888888888",
             receiverAddress: "中国慕城"
+        }),
+        headers: {
+            'Content-Type': 'application/json;charset=UTF-8'
         }
     })
 }

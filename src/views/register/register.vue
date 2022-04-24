@@ -17,30 +17,47 @@
 </template>
 
 <script>
+import {UserRegister} from '@/network/login.js'
 export default {
   name:'register',
+  data(){
+    return{
+      message:''
+    }
+  },
   methods:{
-    clickRegister(){
-      if(this.$refs.username.value.length<1){
+    async clickRegister(){
+      let name = this.$refs.username.value;
+      let pwd = this.$refs.password1.value; 
+      if(name.length<1){
         this.$refs.usernameerr.style.display='inline'
       }
-      if(this.$refs.password1.value.length<6){
+      if(pwd.length<6){
         this.$refs.pwderr1.style.display='inline'
       }
-      if(this.$refs.password1.value != this.$refs.password2.value){
+      if(pwd != this.$refs.password2.value){
         this.$refs.pwderr2.style.display='inline'
       }
-      if(this.$refs.username.value.length>1 && this.$refs.password1.value == this.$refs.password2.value && this.$refs.password1.value.length>=6){
+      if(name.length>1 && pwd == this.$refs.password2.value && pwd.length>=6){
         this.$refs.usernameerr.style.display='none'
         this.$refs.pwderr1.style.display='none'
         this.$refs.pwderr2.style.display='none'
-        alert('注册成功！欢迎！')
-        this.$router.replace('/login');
+        let res = await UserRegister(name ,pwd);
+        console.log(res);
+        if(res.status == 21008){
+          this.message="用户名已存在！"
+        }
+        else{
+          alert('注册成功！请登录！')
+          this.$router.replace('/login');
+        }
+        
       }
     },blurinput(){
         this.$refs.usernameerr.style.display='none'
         this.$refs.pwderr1.style.display='none'
         this.$refs.pwderr2.style.display='none'
+        this.message=""
     }
   }
 }
@@ -48,7 +65,9 @@ export default {
 
 <style scoped>
 .register{
-  color: gray;
+  color: rgb(255, 255, 255);
+  height: 94.5vh;
+  background: url('@/assets/img/bgc1.png');
 }
 .input_wrap{
   /* width: 11rem; */
@@ -58,8 +77,8 @@ export default {
   left: 50%;
   transform: translate(-50%,-50%);
   padding: .1rem .5rem;
-  background-color: #f6f8fa;
-  box-shadow: 10px 0 10px rgb(170, 170, 170);
+  background-color: #f6f8fa8e;
+  /* box-shadow: 10px 0 10px rgb(170, 170, 170); */
 }
 .register_title{
   text-align: center;
@@ -77,12 +96,17 @@ export default {
 .input_wrap span{
   display: none; 
   margin: 0 .5rem ;
-  color: red;
+  color: rgb(171, 0, 0);
 }
 .el-button{
-  margin-top: .5rem;
+  margin-top: .2rem;
   /* margin-left: 2rem; */
   width: 6.95rem;
   height: .85rem;
+}
+.worring{
+  height: .5rem;
+  color:rgb(165, 0, 0);
+  text-align: center;
 }
 </style>

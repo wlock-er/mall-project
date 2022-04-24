@@ -2,10 +2,12 @@
   <div class="goods_list_wrap">
       <search-bar>
         <template v-slot:cart >
+            <el-badge :value="cartSize" class="cart_item">
               <div class="my_cart">
-                <span class="iconfont icon-cart"></span>
+                 <span class="iconfont icon-cart"></span>
                  <p>我的购物车</p>
               </div>
+           </el-badge>
         </template>
       </search-bar>
   <el-row class="tac list_left">
@@ -38,7 +40,7 @@
         </el-menu-item>
         <el-menu-item index="10">
           <el-icon><fries /></el-icon>
-          <span>蔬菜蛋品</span>
+          <span>蔬菜菌菇</span>
         </el-menu-item>
         <el-menu-item index="">
         </el-menu-item>
@@ -61,9 +63,10 @@
 </template>
 
 <script>
+import { useStore } from "vuex";
 import { ElMessage } from 'element-plus'
 import { ref, onMounted, watch, toRefs, computed,reactive } from 'vue'
-import {getHomeProductList, getGoodsListProductList } from '@/network/home.js'
+import {getGoodsListProductList ,getHomeProductList} from '@/network/home.js'
 import { addProductInCart} from '@/network/detail.js'
 import SearchBar from '@/components/common/search.vue'
 import { useRouter,useRoute } from "vue-router"
@@ -90,10 +93,12 @@ export default {
         Chicken
     },
     setup(){
+        const store = new useStore(); 
         let goodslist=ref([]);
         let index_id=ref(1);
         let route=useRoute();
         let router=useRouter();
+        let cartSize=ref(0);
         let getgoodslist= async function(){
             let res=await getHomeProductList(route.query.id)
             // console.log(route.query.id);
@@ -104,8 +109,11 @@ export default {
               let res2=await getHomeProductList(27);
                goodslist.value.push(...res2.data.list);
             }
-
             index_id.value= route.query.id==27? 10:route.query.id;
+            store.dispatch('getCartS');
+            setTimeout(()=>{
+              cartSize.value=store.state.cartSize;
+            },500)
         }
         let goGoods_detail =function(id){
             router.replace('/home/detail?id='+id)
@@ -129,11 +137,16 @@ export default {
         let addCart = async function(id){
           let res =await addProductInCart(id,1);
           console.log(res);
+          store.dispatch('getCartS');
+          setTimeout(()=>{
+            cartSize.value=store.state.cartSize;
+          },500)
           ElMessage('加入购物车成功！')
         }
         onMounted(getgoodslist)
         return{
             goodslist,
+            cartSize,
             goGoods_detail,
             selected,
             addCart,
@@ -148,14 +161,19 @@ export default {
   margin:0 3rem ;
 }
 .my_cart{
-  float: right;
+  cursor: pointer;
+  /* float: right; */
   color: rgb(211, 25, 25);
   font-size: .3rem;
   width: 2.3rem;
   height: .58rem ;
   padding-left: .15rem;
-  margin: 1.2rem 2rem 0 1.5rem;
+  /* margin: 1.2rem 2rem 0 1.5rem; */
   border: 1px solid rgb(187, 187, 187);
+}
+.cart_item{
+  float: right;
+  margin: 1.2rem 2rem 0 1.5rem;
 }
 .my_cart p{
   display: inline-block;

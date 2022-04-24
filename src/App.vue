@@ -19,10 +19,11 @@ export default{
     this.path=this.$route.path;
   },
   watch:{
-    // $route(to, from){
-    //   this.path=to.path;
-    //   console.log(to.path);
-    // }
+    $route(to, from){
+      // this.path=to.path;
+      window.scrollTo(0,0);
+      console.log('to.path');
+    }
   }
 }
 </script>

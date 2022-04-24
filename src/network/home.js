@@ -1,14 +1,9 @@
 import { request } from "@/network/request.js"
 export function getHomeCategoryList() {
     return request({
-        url: '/admin/category/list',
-        params: {
-            pageNum: 1,
-            pageSize: 10
-        }
+        url: '/category/list'
     })
 }
-
 export function getHomeProductList(id) {
     return request({
         url: '/product/list',
@@ -16,7 +11,31 @@ export function getHomeProductList(id) {
             orderBy: 'price asc',
             categoryId: id,
             pageNum: 1,
-            pageSize: 10
+            pageSize: 5
+        }
+    })
+}
+
+export function getSeacrhProductList(key) {
+    return request({
+        url: '/product/list',
+        params: {
+            orderBy: 'price asc',
+            keyword: key,
+            pageNum: 1,
+            pageSize: 50
+        }
+    })
+}
+export function getSeacrhProductListById(key, id) {
+    return request({
+        url: '/product/list',
+        params: {
+            orderBy: 'price asc',
+            keyword: key,
+            categoryId: id,
+            pageNum: 1,
+            pageSize: 50
         }
     })
 }

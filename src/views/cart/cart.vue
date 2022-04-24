@@ -15,7 +15,7 @@
            <div class="title_list">数量</div>
            <div class="title_list">小计</div>
        </div>
-       <div class="cart_list_wrap">
+       <div class="cart_list_wrap" v-if="cartlist[0] !=null">
            <div class="cart_list" v-for="(item,index) in cartlist" :key="index" >
                <input type="checkbox" @click="checkthis(item.productId,index)" :checked="item.selected">
                <img :src="item.imgpath" alt="">
@@ -27,6 +27,9 @@
                <div class="amount_price">￥{{item.amountPrice}}</div>
                <div class="delete" @click="deleteGoods(index)">删除</div>
            </div>
+       </div>
+       <div class="cart_list_wrap null_wrap" v-else>
+           <div class="iconfont icon-null"></div> 购物车还没有东西噢
        </div>
        <div class="cart_bottom" ref="bottom">
            <div class="bottom_check">
@@ -58,37 +61,6 @@ export default {
         let context=ref('')
         let isCheckAll=ref(false);
         let cartlist=reactive([]);
-        let goods_detail=reactive([{
-                title:'红颜奶油草莓 约重500g/20-24颗 新鲜水果红颜奶油草莓 约重500g/20-24颗 新鲜水果红颜奶油草莓 约重500g/20-24颗 新鲜水果红颜奶油草莓 约重500g/20-24颗 新鲜水果',
-                price:120,
-                amount:1,
-                amountPrice:120
-            },{
-                title:'红颜奶油草莓 约重500g/20-24颗 新鲜水果红颜奶油草莓 约重500g/20-24颗 新鲜水果',
-                price:120,
-                amount:1,
-                amountPrice:120
-            },{
-                title:'红颜奶油草莓 约重500g/20-24颗 新鲜水果',
-                price:120,
-                amount:1,
-                amountPrice:120
-            },{
-                title:'红颜奶油草莓 约重500g/20-24颗 新鲜水果',
-                price:120,
-                amount:1,
-                amountPrice:120
-            },{
-                title:'红颜奶油草莓 约重500g/20-24颗 新鲜水果',
-                price:120,
-                amount:1,
-                amountPrice:120
-            },{
-                title:'红颜奶油草莓 约重500g/20-24颗 新鲜水果',
-                price:120,
-                amount:1,
-                amountPrice:120
-            }])
         let getcartList=async function(){
             let res =await getCartList();
             // console.log(res);
@@ -180,7 +152,6 @@ export default {
         }
         onMounted(getcartList)
         return{
-            goods_detail,
             context,
             isCheckAll,
             cartlist,
@@ -371,5 +342,11 @@ input{
     color: #fff;
     padding: 0.2rem .3rem;
     background-color: rgb(219, 0, 0);
+}
+
+
+.null_wrap{
+    text-align: center;
+    margin: 2.5rem 0;
 }
 </style>

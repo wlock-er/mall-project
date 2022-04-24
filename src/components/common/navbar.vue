@@ -17,10 +17,12 @@
             <div class="nav" :class="{navclick: path=='/order'}" @click="ClickNav('/order')">我的订单</div>
             <div class="nav" :class="{navclick: path=='/cart'}" @click="ClickNav('/cart')">购物车</div>
             <div class="nav" :class="{navclick: path=='/personal'}" @click="ClickNav('/personal')">个人中心</div>
-            <div class="nav username">平安喜乐
+            <div class="nav username">
+                <span>{{cookie}}</span>
+                <!-- {{$store.state.username}} -->
                 <span class="iconfont icon-xiala"></span>
                 <div class="dropdown">
-                    <div>dropdown...</div>
+                    <p>{{createTime}}</p>
                     <el-button type="info" round @click="logout">退出登录</el-button>
                 </div>
             </div>
@@ -30,28 +32,41 @@
 </template>
 
 <script>
+import {getUserDtail} from '@/network/order.js'
+import { ref, onMounted, watch, reactive } from 'vue'
+import { useStore } from "vuex";
+import { useRouter,useRoute } from "vue-router"
 export default {
-    name:"NavBar",
-    data(){
-      return{
-          path:'/home'
-      }  
-    },
-    methods:{
-        ClickNav(path){
-            this.path=path;
-            this.$router.replace(path);
-        },
-        logout(){
-            this.$store.commit('logOut');
-            this.$router.replace('/login');
+    setup(){
+        const store = new useStore(); 
+        const router = useRouter();
+        let path=ref('/home');
+        let cookie =ref(document.cookie.split('=')[1]);
+        let createTime=ref('')
+        let ClickNav = function(p){
+            path.value=p;
+            router.replace(p);
         }
-    },
-    watch:{
-        $route(to, from){
-        this.path=to.path;
-        // console.log(to.path);
-    }
+        let logout = function(){
+            store.commit('logOut');
+            router.replace('/login');
+        }
+        watch(()=>router.currentRoute.value.fullPath,(v)=>{
+            console.log(v);
+            path.value=v;
+            cookie.value=document.cookie.split('=')[1];
+        })
+        onMounted(async()=>{
+            let res =await getUserDtail();
+            createTime.value=res.data.createTime.split('T').join(" ").split('.')[0];
+        })
+        return{
+            path,
+            cookie,
+            createTime,
+            ClickNav,
+            logout
+        }
     }
 }
 </script>
@@ -99,21 +114,21 @@ body{
     position: relative;
 }
 .dropdown{
+    text-align: center;
     z-index: 10;
     display: none;
     position: absolute;
     top: .8rem;
     left: 0;
-    background-color: rgb(226, 226, 226);
+    background-color: rgb(87, 87, 87);
     width: 5rem;
-    height: 2rem;
+    /* height: 2rem; */
     padding: .25rem;
-}
-.username:hover{
-    background-color: rgb(255, 255, 255);
-    color: black;
 }
 .username:hover .dropdown{
     display: block;
+}
+.username p{
+    margin: .35rem 0; 
 }
 </style>
